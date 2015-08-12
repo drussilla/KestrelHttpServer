@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
         public FrameResponseHeaders()
         {
             _Server = new[] { "Kestrel" };
-            _Date = new[] { DateTime.UtcNow.ToString("r") };
+            _Date = new[] { GetDateHeaderValue() };
             _bits = 67108868L;
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Microsoft.AspNet.Server.Kestrel.Http
 {
@@ -182,6 +183,12 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
 
     public partial class FrameResponseHeaders : FrameHeaders
     {
+        private static bool _hadRequestsSinceLastTimerTick = false;
+        private static volatile string _dateValue;
+        private static Timer _dateValueTimer;
+        private static object _timerLocker = new object();
+        private static int _timerTicksSinceLastRequest;
+
         public Enumerator GetEnumerator()
         {
             return new Enumerator(this);
@@ -224,6 +231,64 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
             public void Reset()
             {
                 _state = 0;
+            }
+        }
+
+        private static string GetDateHeaderValue()
+        {
+            PumpTimer();
+
+            return _dateValue;
+        }
+
+        private static void PumpTimer()
+        {
+            // TODO: Kinda horrible all this code is here. Probably better to manage this timer in KestrelEngine so it
+            //       can be disposed properly when the app shuts down.
+            _hadRequestsSinceLastTimerTick = true;
+
+            if (_dateValueTimer == null)
+            {
+                lock (_timerLocker)
+                {
+                    if (_dateValueTimer == null)
+                    {
+                        _dateValue = DateTime.UtcNow.ToString("r");
+                        _dateValueTimer = new Timer(UpdateDateValue, null, 1000, 1000);
+                    }
+                }
+            }
+        }
+
+        private static void UpdateDateValue(object state)
+        {
+            _dateValue = DateTime.UtcNow.ToString("r");
+
+            if (_hadRequestsSinceLastTimerTick)
+            {
+                // We served requests since the last tick, just return
+                _hadRequestsSinceLastTimerTick = false;
+                _timerTicksSinceLastRequest = 0;
+                return;
+            }
+
+            // No requests since the last timer tick
+            _timerTicksSinceLastRequest++;
+            if (_timerTicksSinceLastRequest == 10)
+            {
+                // No requests for 10 seconds so stop the timer
+                if (_dateValueTimer != null)
+                {
+                    lock (_timerLocker)
+                    {
+                        if (_dateValueTimer != null)
+                        {
+                            _dateValueTimer.Dispose();
+                            _dateValueTimer = null;
+                            _dateValue = null;
+                        }
+                    }
+                }
             }
         }
     }

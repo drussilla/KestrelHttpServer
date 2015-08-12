@@ -175,7 +175,7 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
         public FrameResponseHeaders()
         {{
             _Server = new[] {{ ""Kestrel"" }};
-            _Date = new[] {{ DateTime.UtcNow.ToString(""r"") }};
+            _Date = new[] {{ GetDateHeaderValue() }};
             _bits = {
                 1L << responseHeaders.First(header => header.Name == "Server").Index |
                 1L << responseHeaders.First(header => header.Name == "Date").Index
