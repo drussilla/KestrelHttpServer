@@ -13,9 +13,10 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
     {
         UvPipeHandle DispatchPipe { get; set; }
 
-        public ListenerSecondary(IMemoryPool memory)
+        public ListenerSecondary(IMemoryPool memory, DateHeaderValueManager dateHeaderValueManager)
         {
             Memory = memory;
+            DateHeaderValueManager = dateHeaderValueManager;
         }
 
         public Task StartAsync(

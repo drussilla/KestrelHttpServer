@@ -13,7 +13,8 @@ namespace Microsoft.AspNet.Server.KestrelTests
         [Fact]
         public void InitialDictionaryContainsServerAndDate()
         {
-            IDictionary<string, string[]> headers = new FrameResponseHeaders();
+            var dateHeaderValue = DateTime.Now.ToString("r");
+            IDictionary<string, string[]> headers = new FrameResponseHeaders(dateHeaderValue);
 
             Assert.Equal(2, headers.Count);
 
@@ -26,8 +27,7 @@ namespace Microsoft.AspNet.Server.KestrelTests
             DateTime date;
             Assert.True(headers.TryGetValue("Date", out dateHeader));
             Assert.Equal(1, dateHeader.Length);
-            Assert.True(DateTime.TryParse(dateHeader[0], out date));
-            Assert.True(DateTime.Now - date <= TimeSpan.FromMinutes(1));
+            Assert.Equal(dateHeaderValue, dateHeader[0]);
 
             Assert.False(headers.IsReadOnly);
         }
@@ -35,7 +35,8 @@ namespace Microsoft.AspNet.Server.KestrelTests
         [Fact]
         public void InitialEntriesCanBeCleared()
         {
-            IDictionary<string, string[]> headers = new FrameResponseHeaders();
+            var dateHeaderValue = DateTime.Now.ToString("r");
+            IDictionary<string, string[]> headers = new FrameResponseHeaders(dateHeaderValue);
 
             headers.Clear();
 

@@ -71,6 +71,7 @@ namespace Microsoft.AspNet.Server.Kestrel
             Threads = new List<KestrelThread>();
             Listeners = new List<Listener>();
             Memory = new MemoryPool();
+            DateHeaderValueManager = new DateHeaderValueManager();
         }
 
         public Libuv Libuv { get; private set; }
@@ -78,6 +79,7 @@ namespace Microsoft.AspNet.Server.Kestrel
         public IApplicationShutdown AppShutdown { get; private set; }
         public List<KestrelThread> Threads { get; private set; }
         public List<Listener> Listeners { get; private set; }
+        public DateHeaderValueManager DateHeaderValueManager { get; private set; }
 
         public void Start(int count)
         {
@@ -99,6 +101,8 @@ namespace Microsoft.AspNet.Server.Kestrel
                 thread.Stop(TimeSpan.FromSeconds(2.5));
             }
             Threads.Clear();
+
+            DateHeaderValueManager.Dispose();
         }
 
         public IDisposable CreateServer(string scheme, string host, int port, Func<Frame, Task> application)
@@ -116,19 +120,19 @@ namespace Microsoft.AspNet.Server.Kestrel
                 {
                     if (single)
                     {
-                        var listener = new Listener(Memory);
+                        var listener = new Listener(Memory, DateHeaderValueManager);
                         listeners.Add(listener);
                         listener.StartAsync(scheme, host, port, thread, application).Wait();
                     }
                     else if (first)
                     {
-                        var listener = new ListenerPrimary(Memory);
+                        var listener = new ListenerPrimary(Memory, DateHeaderValueManager);
                         listeners.Add(listener);
                         listener.StartAsync(pipeName, scheme, host, port, thread, application).Wait();
                     }
                     else
                     {
-                        var listener = new ListenerSecondary(Memory);
+                        var listener = new ListenerSecondary(Memory, DateHeaderValueManager);
                         listeners.Add(listener);
                         listener.StartAsync(pipeName, thread, application).Wait();
                     }

@@ -22,5 +22,7 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
         public Func<Frame, Task> Application { get; set; }
 
         public IMemoryPool Memory { get; set; }
+
+        public DateHeaderValueManager DateHeaderValueManager { get; set; }
     }
 }

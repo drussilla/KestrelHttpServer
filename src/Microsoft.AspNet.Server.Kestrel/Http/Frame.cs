@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
         private bool _keepAlive;
         private bool _autoChunk;
         private readonly FrameRequestHeaders _requestHeaders = new FrameRequestHeaders();
-        private readonly FrameResponseHeaders _responseHeaders = new FrameResponseHeaders();
+        private readonly FrameResponseHeaders _responseHeaders;
 
         /*
         //IDictionary<string, object> _environment;
@@ -47,6 +47,7 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
             FrameControl = this;
             StatusCode = 200;
             RequestHeaders = _requestHeaders;
+            _responseHeaders = new FrameResponseHeaders(DateHeaderValueManager);
             ResponseHeaders = _responseHeaders;
         }
 
@@ -423,7 +424,7 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
                     // the app func has failed. https://github.com/aspnet/KestrelHttpServer/issues/43
                     _onStarting = null;
 
-                    ResponseHeaders = new FrameResponseHeaders();
+                    ResponseHeaders = new FrameResponseHeaders(DateHeaderValueManager);
                     ResponseHeaders["Content-Length"] = new[] { "0" };
                 }
             }

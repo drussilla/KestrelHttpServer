@@ -6,10 +6,10 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
 {
     public partial class FrameResponseHeaders
     {
-        public FrameResponseHeaders()
+        public FrameResponseHeaders(string dateHeaderValue)
         {
             _Server = new[] { "Kestrel" };
-            _Date = new[] { GetDateHeaderValue() };
+            _Date = new[] { dateHeaderValue };
             _bits = 67108868L;
         }
     }

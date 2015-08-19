@@ -31,9 +31,10 @@ namespace Microsoft.AspNet.Server.Kestrel.Http
             }
         }
 
-        public Listener(IMemoryPool memory)
+        public Listener(IMemoryPool memory, DateHeaderValueManager dateHeaderValueManager)
         {
             Memory = memory;
+            DateHeaderValueManager = dateHeaderValueManager;
         }
 
         public Task StartAsync(
